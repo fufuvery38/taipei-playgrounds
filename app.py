@@ -90,55 +90,42 @@ if need_shade:
     df_filtered = df_filtered[df_filtered["是否有遮蔭"].isin(["有", "是"])]
 
 # ==========================================
-# 側邊欄下方：開發者IG連結
+# 主畫面版面配置（手機與電腦體驗優化版）
 # ==========================================
-st.sidebar.write("---")  
-st.sidebar.markdown("### 🛠️ 系統開發與問題反饋")
-st.sidebar.caption(
-    "本導覽系統由安安你好O_O精心開發，如果您在使用過程中有任何問題，歡迎透過IG私訊聯繫！"
-)
-my_instagram_url = "https://www.instagram.com/anan.finds"
-st.sidebar.markdown(f"[👉IG請點擊這邊]({my_instagram_url})")
+# 🌟 貼心把「抽盲盒」的大按鈕直接獨立拉到最上方，讓手機版一進來就能一鍵開抽！
+if st.button("🎲 找不到靈感？點我抽一個公園盲盒！", use_container_width=True):
+    if not df_filtered.empty:
+        st.session_state["chosen_playground"] = df_filtered.sample(1).iloc[0]
+        st.session_state["just_drawn"] = True
+        st.rerun()
+    else:
+        st.error("目前篩選條件下沒有任何公園可以抽盲盒QQ")
 
-# ==========================================
-# 主畫面版面配置
-# ==========================================
-col1, col2 = st.columns([2, 1])
+# 進入左右雙欄配置
+col1, col2 = st.columns([1.8, 1.2])
 
-# 預設地圖的中心點與縮放大小
 map_center = [25.0478, 121.5170]
 map_zoom = 12
 
-# 如果使用者已抽出了盲盒公園，將地圖中心動態切換至該公園，並拉近距離（Zoom=16）
 if "chosen_playground" in st.session_state:
     p_chosen = st.session_state["chosen_playground"]
     if p_chosen["緯度"] != "" and p_chosen["經度"] != "":
         map_center = [float(p_chosen["緯度"]), float(p_chosen["經度"])]
-        map_zoom = 16  # 放大地圖，凸顯目標公園
+        map_zoom = 16
 
 with col1:
     st.subheader("🗺️ 共融公園地圖分佈")
     st.write(f"目前符合篩選條件的遊戲場共： **{len(df_filtered)}** 處")
 
-    if st.button("🎲 找不到靈感？點我抽一個公園盲盒！", use_container_width=True):
-        if not df_filtered.empty:
-            st.session_state["chosen_playground"] = df_filtered.sample(1).iloc[0]
-            # 🌟 新增一個「剛剛才抽中」的蓋章標記，用來通知後面可以放氣球了
-            st.session_state["just_drawn"] = True
-            st.rerun()  # 先安心重新整理，讓地圖立刻同步定位
-        else:
-            st.error("目前篩選條件下沒有任何公園可以抽盲盒QQ")
-
-    # 建立台北市地圖（帶入動態變動的中心點與縮放層級）
+    # 建立地圖
     m = folium.Map(location=map_center, zoom_start=map_zoom)
 
-    # 把符合條件的公園標記到地圖上
+    # 標記公園
     for idx, row in df_filtered.iterrows():
         try:
             if row["緯度"] != "" and row["經度"] != "":
                 p_lat = float(row["緯度"])
                 p_lon = float(row["經度"])
-
                 p_name = str(row["名稱"])
                 p_open = str(row["開放時間"])
                 p_sandbox = str(row["是否有沙坑"])
@@ -164,68 +151,71 @@ with col1:
         except Exception:
             continue
 
-    # 將地圖輸出成純網頁HTML原始碼
     html_map = m._repr_html_()
-    components.html(html_map, height=500, scrolling=True)
+    components.html(html_map, height=450, scrolling=True)
 
 
 with col2:
-    st.subheader("🎁盲盒驚喜🎁")
+    st.subheader("🎁 盲盒驚喜 🎁")
 
     if "chosen_playground" in st.session_state:
         p = st.session_state["chosen_playground"]
 
-        #本地圖重整完畢，卡片準備秀出來時，先放氣球飛飛熱鬧一下！
+        #本地圖重整完畢，結果準備秀出來時，先放氣球飛出來熱鬧一下！    
         if st.session_state.get("just_drawn", False):
             st.balloons()
-            st.session_state["just_drawn"] = False 
+            st.session_state["just_drawn"] = False
 
         st.success(f"🎉 恭喜抽中：**{p['名稱']}**")
 
-        with st.spinner(f"🌦️ 正在即時連線氣象署，查詢 {p['行政區']} 天氣..."):
+        with st.spinner(f"🌦️ 正在連線氣象署..."):
             rain_chance = get_weather_rain_chance(p["行政區"])
 
         st.write("### 🌦️ 即時氣象")
         if rain_chance < 30:
             st.metric(
-                label=f"🟢 {p['行政區']} 目前降雨機率",
+                label=f"🟢 {p['行政區']} 降雨機率",
                 value=f"{rain_chance}%",
-                delta="☀️ 天氣晴朗，非常適合戶外活動！",
+                delta="☀️ 天氣晴朗，適合出遊！",
             )
             if "有" in str(p["是否有沙坑"]):
-                st.info("💡 貼心提醒：今天好天氣，記得幫小朋友多帶一套衣服去玩沙坑喔！")
+                st.info("💡 貼心提醒：記得多帶一套衣服玩沙喔！")
         else:
             st.metric(
-                label=f"🔴 {p['行政區']} 目前降雨機率",
+                label=f"🔴 {p['行政區']} 降雨機率",
                 value=f"{rain_chance}%",
-                delta="⚠️ 降雨機率偏高，請注意雨勢！",
+                delta="⚠️ 降雨機率高，請注意雨勢！",
                 delta_color="inverse",
             )
-
             if "有" in str(p["是否有遮蔭"]):
-                st.warning(
-                    f"☔ 雖然該區有高機率降雨，但偵測到 **{p['名稱']}** 具備【雨天遮蔭/捷運橋下空間】，仍可作為備案前往！"
-                )
+                st.warning(f"☔ 該區有雨，但 **{p['名稱']}** 有遮蔭空間，可當雨天備案！")
             else:
-                st.error(
-                    f"❌ 警告：**{p['名稱']}** 為全露天場地且無遮蔭。強烈建議取消戶外行程，改往附近的【台北市免費室內親子館】或備案室內行程！"
-                )
+                st.error(f"❌ 警告：**{p['名稱']}** 為全露天無遮蔭，強烈建議改往室內親子館！")
 
         st.write("---")
-
-        st.write(f"📍 **所在行政區：** {p['行政區']}")
+        st.write(f"📍 **行政區：** {p['行政區']}")
         st.write(f"🕒 **開放時間：** {p['開放時間']}")
-        st.write(f"🏖️ **是否有沙坑：** {p['是否有沙坑']}")
-        st.write(f"🚽 **是否有廁所：** {p['是否有廁所']}")
-        st.write(f"🌳 **是否有遮蔭：** {p['是否有遮蔭']}")
-        st.write(f"🏠 **詳細地址：** {p['地址']}")
+        st.write(f"🏖️ **有沙坑嗎：** {p['是否有沙坑']} | 🚽 **有廁所嗎：** {p['是否有廁所']}")
+        st.write(f"🌳 **有遮蔭嗎：** {p['是否有遮蔭']}")
+        st.write(f"🏠 **地址：** {p['地址']}")
 
         card_safe_name = urllib.parse.quote(f"台北市 {p['名稱']}")
         card_nav_link = f"https://www.google.com/maps/search/?api=1&query={card_safe_name}"
 
-        st.markdown(f"[🗺️ 地圖：點我即開啟 Google Map 導航]({card_nav_link})")
-        st.markdown(f"[✨ 必點：遊戲區官網介紹(內有詳細圖文說明)]({p['詳細頁網址']})")
+        st.markdown(f"[🗺️ 點我開啟 Google Map 導航]({card_nav_link})")
+        st.markdown(f"[✨ 點我查看遊戲區官網詳細圖文]({p['詳細頁網址']})")
 
     else:
-        st.info("👈 請點擊左側的「🎲 抽一個公園盲盒」按鈕，看看今天要去哪裡冒險吧！")
-        
+        st.info("💡 請點擊上方的大按鈕抽個公園盲盒，看看今天去哪冒險！")
+
+# ==========================================
+# 全網頁最下方：手機板與電腦版側邊欄 IG 聯絡區塊
+# ==========================================
+st.sidebar.write("---")  
+st.sidebar.markdown("### 🛠️ 系統開發與問題反饋")
+st.sidebar.caption(
+    "本導覽系統由安安你好O_O精心開發，如果您在使用過程中有任何問題，歡迎透過 IG 私訊聯繫！"
+) 
+
+my_instagram_url = "https://www.instagram.com/anan.finds"
+st.sidebar.markdown(f"[👉 IG請點擊這邊 👈]({my_instagram_url})")
