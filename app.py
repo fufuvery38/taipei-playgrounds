@@ -17,7 +17,10 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("🛝 台北市共融式遊戲場")
+st.markdown(
+    "<h1 style='color: #faa2ce;'>✨ 台北市共融式遊戲場 智慧導覽系統</h1>",
+    unsafe_allow_html=True,
+)
 st.caption("""
 「共融式遊戲場」強調包容與平等，
 讓不同能力與需求的孩子都能自在探索、快樂遊戲。
