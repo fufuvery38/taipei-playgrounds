@@ -75,7 +75,6 @@ selected_district = st.sidebar.selectbox("選擇行政區", districts)
 st.sidebar.subheader("設施需求")
 need_sandbox = st.sidebar.checkbox("一定要有沙坑 🏖️")
 need_toilet = st.sidebar.checkbox("一定要有廁所 🚽")
-need_shade = st.sidebar.checkbox("一定要有遮蔭 🌳")
 
 # 安全過濾
 df_filtered = df.copy()
@@ -196,16 +195,15 @@ with col2:
                 delta="⚠️ 降雨機率高，請注意雨勢！",
                 delta_color="inverse",
             )
-            if "有" in str(p["是否有遮蔭"]):
-                st.warning(f"☔ 該區有雨，但 **{p['名稱']}** 有遮蔭空間，可當雨天備案！")
-            else:
-                st.error(f"❌ 警告：**{p['名稱']}** 為全露天無遮蔭，強烈建議改往室內親子館！")
+            st.error(
+                f"☔ 該區降雨機率較高，出門記得攜帶雨具！若雨勢過大，強烈建議改往各區的「室內親子館」玩耍，以免掃興喔！"
+            )
 
         st.write("---")
         st.write(f"📍 **行政區：** {p['行政區']}")
         st.write(f"🕒 **開放時間：** {p['開放時間']}")
-        st.write(f"🏖️ **有沙坑嗎：** {p['是否有沙坑']} | 🚽 **有廁所嗎：** {p['是否有廁所']}")
-        st.write(f"🌳 **有遮蔭嗎：** {p['是否有遮蔭']}")
+        st.write(f"🏖️ **有沙坑嗎：** {p['是否有沙坑']}")
+        st.write(f"🚽 **有廁所嗎：** {p['是否有廁所']}")
         st.write(f"🏠 **地址：** {p['地址']}")
 
         card_safe_name = urllib.parse.quote(f"台北市 {p['名稱']}")
