@@ -6,7 +6,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 
-#氣象署免費授權碼
+# 氣象署免費授權碼
 CWA_API_KEY = "CWA-8FE68F25-827B-4F43-AB91-E9B685F8AF2F"
 
 # ==========================================
@@ -30,6 +30,7 @@ st.caption("""
 還能抽取「公園盲盒」，為親子出遊增添驚喜與樂趣！
 """)
 
+
 # ==========================================
 # 函式：即時抓取指定行政區的降雨機率
 # ==========================================
@@ -42,9 +43,9 @@ def get_weather_rain_chance(district_name):
         locations = data["records"]["locations"][0]["location"]
         for loc in locations:
             if str(loc["locationName"]) == str(district_name):
-                rain_chance = loc["weatherElement"][0]["time"][0][
-                    "elementValue"
-                ][0]["value"]
+                rain_chance = loc["weatherElement"][0]["time"][0]["elementValue"][0][
+                    "value"
+                ]
                 return int(rain_chance)
         return 0
     except Exception:
@@ -88,8 +89,7 @@ if need_sandbox:
 if need_toilet:
     df_filtered = df_filtered[df_filtered["是否有廁所"].isin(["有", "是", "開"])]
 
-if need_shade:
-    df_filtered = df_filtered[df_filtered["是否有遮蔭"].isin(["有", "是"])]
+# 💡 備註：遮蔭過濾邏輯已移除，確保資料高準確度！
 
 # ==========================================
 # 主畫面版面配置
@@ -135,8 +135,9 @@ with col1:
                 safe_name = urllib.parse.quote(f"台北市 {p_name}")
                 p_nav_link = f"https://www.google.com/maps/search/?api=1&query={safe_name}"
 
-                p_url = str(row["詳細頁網址"])  
+                p_url = str(row["詳細頁網址"])
 
+                # 🌟 這裡幫地圖的小針也補上精美粉紅色的詳細圖文連結囉！
                 popup_html = f"""
                 <div style='font-family: sans-serif; font-size: 14px; width: 210px;'>
                     <b>{p_name}</b><br>
@@ -169,7 +170,7 @@ with col2:
     if "chosen_playground" in st.session_state:
         p = st.session_state["chosen_playground"]
 
-        #本地圖重整完畢，結果準備秀出來時，先放氣球飛出來熱鬧一下！    
+        # 本地圖重整完畢，結果準備秀出來時，先放氣球飛出來熱鬧一下！
         if st.session_state.get("just_drawn", False):
             st.balloons()
             st.session_state["just_drawn"] = False
@@ -195,8 +196,9 @@ with col2:
                 delta="⚠️ 降雨機率高，請注意雨勢！",
                 delta_color="inverse",
             )
+            # 🌟 優化後的純溫馨氣象判斷，下雨就直接提醒
             st.error(
-                f"☔ 該區降雨機率較高，出門記得攜帶雨具！若雨勢過大，強烈建議改往各區的「室內親子館」玩耍，以免掃興喔！"
+                f"☔ 該區降雨機率較高，出門記得攜帶雨具！若雨勢過大，強烈建議改往各區的「室室親子館」玩耍，以免掃興喔！"
             )
 
         st.write("---")
@@ -218,11 +220,11 @@ with col2:
 # ==========================================
 # 全網頁最下方：手機板與電腦版側邊欄 IG 聯絡區塊
 # ==========================================
-st.sidebar.write("---")  
+st.sidebar.write("---")
 st.sidebar.markdown("### 🛠️ 系統開發與問題反饋")
 st.sidebar.caption(
     "本導覽系統由安安你好O_O精心開發，如果您在使用過程中有任何問題，歡迎透過 IG 私訊聯繫！"
-) 
+)
 
 my_instagram_url = "https://www.instagram.com/anan.finds"
 st.sidebar.markdown(f"[👉 IG請點擊這邊 👈]({my_instagram_url})")
