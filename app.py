@@ -136,12 +136,19 @@ with col1:
                 safe_name = urllib.parse.quote(f"台北市 {p_name}")
                 p_nav_link = f"https://www.google.com/maps/search/?api=1&query={safe_name}"
 
+                p_url = str(row["詳細頁網址"])  
+
                 popup_html = f"""
-                <div style='font-family: sans-serif; font-size: 14px; width: 200px;'>
+                <div style='font-family: sans-serif; font-size: 14px; width: 210px;'>
                     <b>{p_name}</b><br>
                     🕒 開放時間：{p_open}<br>
                     🏖️ 沙坑：{p_sandbox} | 🚽 廁所：{p_toilet}<br>
-                    <a href='{p_nav_link}' target='_blank' style='color: blue; text-decoration: underline;'>👉 開啟Google地圖導航</a>
+                    <div style='margin-top: 8px;'>
+                        <a href='{p_nav_link}' target='_blank' style='color: #1E90FF; text-decoration: none; font-weight: bold;'>🗺️ 開啟Google地圖導航</a>
+                    </div>
+                    <div style='margin-top: 5px;'>
+                        <a href='{p_url}' target='_blank' style='color: #FF69B4; text-decoration: none; font-weight: bold;'>✨ 點我查看遊戲區官網詳細圖文</a>
+                    </div>
                 </div>
                 """
 
